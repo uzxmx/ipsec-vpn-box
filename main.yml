@@ -1,0 +1,39 @@
+- hosts: default
+  tasks:
+    - name: Install dependencies
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - libreswan
+        - xl2tpd
+      become: yes
+    - name: Copy ipsec config file
+      template:
+        src: etc/ipsec.d/main.conf.j2
+        dest: /etc/ipsec.d/main.conf
+      become: yes
+    - name: Copy ipsec secret file
+      template:
+        src: etc/ipsec.d/main.secrets.j2
+        dest: /etc/ipsec.d/main.secrets
+      become: yes
+    - name: Copy xl2tpd config file
+      template:
+        src: etc/xl2tpd/xl2tpd.conf.j2
+        dest: /etc/xl2tpd/xl2tpd.conf
+      become: yes
+    - name: Copy ppp config file
+      template:
+        src: etc/ppp/options.l2tpd.client.j2
+        dest: /etc/ppp/options.l2tpd.client
+      become: yes
+    - name: Enable and restart services
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: restarted
+      with_items:
+        - ipsec
+        - xl2tpd
+      become: yes
